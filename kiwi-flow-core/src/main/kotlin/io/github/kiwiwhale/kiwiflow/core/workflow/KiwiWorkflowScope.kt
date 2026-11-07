@@ -1,6 +1,6 @@
 package io.github.kiwiwhale.kiwiflow.core.workflow
 
-import io.github.kiwiwhale.kiwiflow.core.KiwiFlowDsl
+import io.github.kiwiwhale.kiwiflow.core.KiwiFlowDslMarker
 import io.github.kiwiwhale.kiwiflow.core.context.WorkflowContext
 import io.github.kiwiwhale.kiwiflow.core.exception.KiwiFlowException
 import io.github.kiwiwhale.kiwiflow.core.execution.ExecutionTracker
@@ -22,7 +22,7 @@ import io.github.kiwiwhale.kiwiflow.core.step.StepBuilder
  * @see KiwiWorkflow
  * @see WorkflowContext
  */
-@KiwiFlowDsl
+@KiwiFlowDslMarker
 class KiwiWorkflowScope<I> internal constructor(
     val input: I,
     internal val tracker: ExecutionTracker,
