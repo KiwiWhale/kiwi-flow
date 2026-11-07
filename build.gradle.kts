@@ -39,6 +39,8 @@ dokka {
     }
 }
 
+val coroutinesTest = libs.kotlinx.coroutines.test
+
 subprojects {
     pluginManager.apply("java-library")
     pluginManager.apply("org.jetbrains.kotlin.jvm")
@@ -61,6 +63,7 @@ subprojects {
 
     dependencies {
         "testImplementation"(kotlin("test"))
+        "testImplementation"(coroutinesTest)
     }
 
     tasks.withType<Test>().configureEach {
