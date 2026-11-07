@@ -10,7 +10,7 @@ logback = "1.6.6"
 dokka = "2.3.0"
 doenv = "4.0.0"
 
-kiwi-registry = "1.2.2-SNAPSHOT"
+kiwi-registry = "2.0.0"
 
 
 [libraries]
