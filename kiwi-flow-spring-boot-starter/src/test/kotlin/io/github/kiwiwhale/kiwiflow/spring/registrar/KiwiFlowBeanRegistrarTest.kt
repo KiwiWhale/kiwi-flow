@@ -2,13 +2,10 @@ package io.github.kiwiwhale.kiwiflow.spring.registrar
 
 import io.github.kiwiwhale.kiwiflow.annotation.Step
 import io.github.kiwiwhale.kiwiflow.annotation.Workflow
-import io.github.kiwiwhale.kiwiflow.core.workflow.KiwiWorkflowRegistry
-import io.github.kiwiwhale.kiwiflow.spring.factory.SpringWorkflowFactory
+import io.github.kiwiwhale.kiwiflow.spring.KiwiFlowTestContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
-import org.springframework.context.support.registerBean
 
 class KiwiFlowBeanRegistrarTest {
 
@@ -31,63 +28,68 @@ class KiwiFlowBeanRegistrarTest {
         fun execute(input: String) = "Meta $input"
     }
 
-    @Test
-    fun `Workflow 어노테이션이 있는 Bean을 자동 등록한다`() {
-        val context = createContext {
-            TestWorkflow()
-        }
-
-        context.use {
-            val registry = it.getBean(KiwiWorkflowRegistry::class.java)
-
-            assertTrue(registry.contains("TestWorkflow"))
-            assertEquals(setOf("TestWorkflow"), registry.keys)
-        }
-    }
+    class PlainBean
 
     @Test
-    fun `Meta-annotation으로 선언된 Workflow도 자동 등록한다`() {
-        val context = createContext {
-            MetaTestWorkflow()
-        }
-
-        context.use {
-            val registry = it.getBean(KiwiWorkflowRegistry::class.java)
-
-            assertTrue(registry.contains("MetaWorkflow"))
-            assertEquals(setOf("MetaWorkflow"), registry.keys)
-        }
-    }
-
-    private fun createContext(
-        workflowProvider: () -> Any
-    ): AnnotationConfigApplicationContext {
-        val context = AnnotationConfigApplicationContext()
-
-        val registry = KiwiWorkflowRegistry()
-        val factory = SpringWorkflowFactory()
-
-        context.registerBean("testWorkflow") {
-            workflowProvider()
-        }
-
-        context.registerBean {
-            registry
-        }
-
-        context.registerBean {
-            factory
-        }
-
-        context.registerBean {
-            KiwiFlowBeanRegistrar(
-                applicationContext = context,
-                factory = factory,
+    fun `Workflow 어노테이션이 있는 Bean을 등록한다`() {
+        KiwiFlowTestContext.create(
+            "testWorkflow" to TestWorkflow()
+        ).use { test ->
+            assertEquals(
+                setOf("TestWorkflow"),
+                test.registry.keys
             )
         }
-
-        context.refresh()
-
-        return context
     }
+
+    @Test
+    fun `Meta annotation으로 선언된 Workflow를 등록한다`() {
+        KiwiFlowTestContext.create(
+            "metaWorkflow" to MetaTestWorkflow()
+        ).use { test ->
+            assertEquals(
+                setOf("MetaWorkflow"),
+                test.registry.keys
+            )
+        }
+    }
+
+    @Test
+    fun `Workflow annotation이 없는 Bean은 무시한다`() {
+        KiwiFlowTestContext.create(
+            "plainBean" to PlainBean()
+        ).use { test ->
+            assertTrue(test.registry.isEmpty)
+        }
+    }
+
+    @Test
+    fun `하나의 Bean에 선언된 여러 Workflow를 등록한다`() {
+        KiwiFlowTestContext.create(
+            "multiWorkflow" to MultiWorkflow()
+        ).use { test ->
+            assertEquals(
+                setOf("FirstWorkflow", "SecondWorkflow"),
+                test.registry.keys
+            )
+        }
+    }
+
+    @FirstWorkflow
+    @SecondWorkflow
+    class MultiWorkflow {
+
+        @Step
+        fun execute(input: String) = input
+    }
+
+    @Target(AnnotationTarget.CLASS)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Workflow(name = "FirstWorkflow")
+    annotation class FirstWorkflow
+
+    @Target(AnnotationTarget.CLASS)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Workflow(name = "SecondWorkflow")
+    annotation class SecondWorkflow
 }
