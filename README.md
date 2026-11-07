@@ -1,4 +1,4 @@
-# kiwi-flow
+# 🥝 kiwi-flow
 
 [![Reposilite](https://repo.mrjimin.xyz/api/badge/latest/releases/io/github/kiwiwhale/kiwi-flow-core?color=40c14a&name=Reposilite)](https://repo.mrjimin.xyz/#/releases/io/github/kiwiwhale/kiwi-flow-core)
 [![GitHub License](https://img.shields.io/github/license/KiwiWhale/kiwi-flow?style=flat-square)](LICENSE)
