@@ -14,8 +14,8 @@ val KiwiFlowPlugin = createApplicationPlugin(
     name = "KiwiFlowPlugin",
     createConfiguration = ::KiwiFlowConfig
 ) {
-    pluginConfig.registerContributions()
-    val registry = KiwiWorkflowRegistry()
+    val provider = pluginConfig.buildProvider()
+    val registry = KiwiWorkflowRegistry(provider)
 
     application.attributes.put(
         KiwiFlowApplicationKey,

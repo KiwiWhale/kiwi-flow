@@ -16,39 +16,21 @@ class KiwiFlowApplicationTest {
         }
 
     @Test
-    fun `Workflow 등록 여부를 확인한다`() = testApplication {
+    fun `등록된 Workflow를 조회한다`() = testApplication {
         application {
             install(KiwiFlowPlugin) {
-                workflow("Test", workflow)
+                workflow(workflow)
             }
 
             assertTrue(kiwiFlow.contains("Test"))
             assertFalse(kiwiFlow.contains("Unknown"))
-        }
-    }
-
-    @Test
-    fun `등록된 Workflow 이름을 조회한다`() = testApplication {
-        application {
-            install(KiwiFlowPlugin) {
-                workflow("Test", workflow)
-            }
-
-            assertEquals(
-                setOf("Test"),
-                kiwiFlow.keys
-            )
-        }
-    }
-
-    @Test
-    fun `등록된 Workflow 개수를 조회한다`() = testApplication {
-        application {
-            install(KiwiFlowPlugin) {
-                workflow("Test", workflow)
-            }
 
             assertEquals(1, kiwiFlow.size)
+            assertFalse(kiwiFlow.isEmpty)
+            assertTrue(kiwiFlow.isNotEmpty)
+
+            assertEquals(setOf("Test"), kiwiFlow.keys)
+            assertEquals(listOf(workflow), kiwiFlow.values.toList())
         }
     }
 }

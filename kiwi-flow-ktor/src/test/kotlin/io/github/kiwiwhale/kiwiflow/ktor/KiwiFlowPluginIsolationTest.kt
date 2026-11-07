@@ -21,13 +21,14 @@ class KiwiFlowPluginIsolationTest {
         }
 
     @Test
-    fun `각 Application은 독립적인 Registry를 가진다`() {
+    fun `각 Application은 독립적인 Workflow Registry를 가진다`() {
         testApplication {
             application {
                 install(KiwiFlowPlugin) {
-                    workflow("First", firstWorkflow)
+                    workflow(firstWorkflow)
                 }
 
+                assertEquals(setOf("First"), kiwiFlow.keys)
                 assertTrue(kiwiFlow.contains("First"))
                 assertFalse(kiwiFlow.contains("Second"))
             }
@@ -36,9 +37,10 @@ class KiwiFlowPluginIsolationTest {
         testApplication {
             application {
                 install(KiwiFlowPlugin) {
-                    workflow("Second", secondWorkflow)
+                    workflow(secondWorkflow)
                 }
 
+                assertEquals(setOf("Second"), kiwiFlow.keys)
                 assertTrue(kiwiFlow.contains("Second"))
                 assertFalse(kiwiFlow.contains("First"))
             }
@@ -46,16 +48,29 @@ class KiwiFlowPluginIsolationTest {
     }
 
     @Test
-    fun `서로 다른 Application의 Workflow 등록 상태가 공유되지 않는다`() {
+    fun `서로 다른 Application은 동일한 이름의 Workflow도 독립적으로 관리한다`() {
+        val firstWorkflow =
+            KiwiFlow.workflow<String, String>("Shared") {
+                "First $input"
+            }
+
+        val secondWorkflow =
+            KiwiFlow.workflow<String, String>("Shared") {
+                "Second $input"
+            }
+
         testApplication {
             application {
                 install(KiwiFlowPlugin) {
-                    workflow("First", firstWorkflow)
+                    workflow(firstWorkflow)
                 }
 
                 assertEquals(
-                    setOf("First"),
-                    kiwiFlow.keys
+                    "First Ktor",
+                    kiwiFlow.workflow(
+                        io.github.kiwiwhale.kiwiflow.core.workflow
+                            .KiwiWorkflowKey<String, String>("Shared")
+                    ).execute("Ktor")
                 )
             }
         }
@@ -63,12 +78,15 @@ class KiwiFlowPluginIsolationTest {
         testApplication {
             application {
                 install(KiwiFlowPlugin) {
-                    workflow("Second", secondWorkflow)
+                    workflow(secondWorkflow)
                 }
 
                 assertEquals(
-                    setOf("Second"),
-                    kiwiFlow.keys
+                    "Second Ktor",
+                    kiwiFlow.workflow(
+                        io.github.kiwiwhale.kiwiflow.core.workflow
+                            .KiwiWorkflowKey<String, String>("Shared")
+                    ).execute("Ktor")
                 )
             }
         }

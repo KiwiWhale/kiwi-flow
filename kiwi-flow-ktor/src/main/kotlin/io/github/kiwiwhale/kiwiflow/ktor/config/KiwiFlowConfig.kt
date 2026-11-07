@@ -2,14 +2,15 @@ package io.github.kiwiwhale.kiwiflow.ktor.config
 
 import io.github.kiwiwhale.kiwiflow.core.workflow.KiwiWorkflow
 import io.github.kiwiwhale.kiwiflow.core.workflow.KiwiWorkflowKey
-import io.github.kiwiwhale.kiwiflow.core.workflow.bootstrap.KiwiWorkflowBootstrap
-import io.github.kiwiwhale.kiwiflow.core.workflow.bootstrap.KiwiWorkflowHolder
+import io.github.kiwiwhale.kiwiregistry.builder.RegistryContributor
+import io.github.kiwiwhale.kiwiregistry.dsl.registryGraph
+import io.github.kiwiwhale.kiwiregistry.provider.RegistryProvider
 
 /**
  * Configuration for registering workflows in a Ktor application.
  *
  * Workflow definitions are collected during configuration
- * and submitted to kiwi-registry during bootstrap.
+ * and submitted to kiwi-registry during application initialization.
  */
 class KiwiFlowConfig {
 
@@ -32,6 +33,7 @@ class KiwiFlowConfig {
         require(key == workflow.key) {
             "Workflow key '${key.name}' does not match workflow key '${workflow.name}'."
         }
+
         registerWorkflow(workflow)
     }
 
@@ -45,9 +47,11 @@ class KiwiFlowConfig {
         require(name.isNotBlank()) {
             "Workflow name cannot be blank."
         }
+
         require(name == workflow.name) {
             "Workflow name '$name' does not match workflow name '${workflow.name}'."
         }
+
         registerWorkflow(workflow)
     }
 
@@ -97,6 +101,7 @@ class KiwiFlowConfig {
             require(name.isNotBlank()) {
                 "Workflow name cannot be blank."
             }
+
             require(name == workflow.name) {
                 "Workflow name '$name' does not match workflow name '${workflow.name}'."
             }
@@ -108,25 +113,29 @@ class KiwiFlowConfig {
     /**
      * Returns a snapshot of registered workflows mapped by typed key.
      */
-    fun registeredWorkflows(): Map<KiwiWorkflowKey<*, *>, KiwiWorkflow<*, *>> =
+    fun registeredWorkflows():
+            Map<KiwiWorkflowKey<*, *>, KiwiWorkflow<*, *>> =
         workflows.values.associateBy { it.key }
 
     /**
-     * Submits collected workflows to the global Core bootstrap holder.
-     * Executes the exact inject -> contribute -> build lifecycle.
+     * Builds a RegistryProvider containing all registered workflows.
      */
-    internal fun registerContributions() {
-        val build = KiwiWorkflowBootstrap.inject()
+    internal fun buildProvider(): RegistryProvider {
+        val entries = LinkedHashMap(workflows)
 
-        KiwiWorkflowHolder.registryBootstrap(KiwiWorkflowBootstrap) {
-            registry(KiwiWorkflowKey.WORKFLOWS) {
-                workflows.forEach { (name, workflow) ->
+        val contributor = RegistryContributor("ktor-workflows") {
+            registry(KiwiWorkflowKey.WORKFLOW_REGISTRY) {
+                entries.forEach { (name, workflow) ->
                     add(name, workflow)
                 }
             }
         }
 
-        build()
+        val graph = registryGraph {
+            contribute(contributor)
+        }
+
+        return RegistryProvider(graph)
     }
 
     private fun registerWorkflow(workflow: KiwiWorkflow<*, *>) {

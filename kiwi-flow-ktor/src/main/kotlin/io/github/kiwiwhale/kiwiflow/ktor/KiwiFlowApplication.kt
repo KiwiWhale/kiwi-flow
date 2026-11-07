@@ -24,6 +24,9 @@ class KiwiFlowApplication internal constructor(
     val isEmpty: Boolean
         get() = registry.isEmpty
 
+    val isNotEmpty: Boolean
+        get() = registry.isNotEmpty
+
     val keys: Set<String>
         get() = registry.keys
 
@@ -36,13 +39,17 @@ class KiwiFlowApplication internal constructor(
     operator fun contains(name: String): Boolean =
         registry.contains(name)
 
-    operator fun get(key: KiwiWorkflowKey<*, *>): KiwiWorkflow<*, *> =
+    operator fun get(
+        key: KiwiWorkflowKey<*, *>
+    ): KiwiWorkflow<*, *> =
         registry[key]
 
     operator fun get(name: String): KiwiWorkflow<*, *>? =
         registry[name]
 
-    fun getOrNull(key: KiwiWorkflowKey<*, *>): KiwiWorkflow<*, *>? =
+    fun getOrNull(
+        key: KiwiWorkflowKey<*, *>
+    ): KiwiWorkflow<*, *>? =
         registry.getOrNull(key)
 
     fun getOrNull(name: String): KiwiWorkflow<*, *>? =
@@ -53,7 +60,7 @@ class KiwiFlowApplication internal constructor(
     ): KiwiWorkflow<I, O> =
         registry.workflow(key)
 
-    fun <I, O> workflow(name: String): KiwiWorkflow<I, O> =
+    fun workflow(name: String): KiwiWorkflow<*, *> =
         registry.workflow(name)
 }
 

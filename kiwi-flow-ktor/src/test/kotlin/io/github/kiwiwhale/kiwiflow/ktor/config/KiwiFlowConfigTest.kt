@@ -130,6 +130,8 @@ class KiwiFlowConfigTest {
         assertFailsWith<IllegalArgumentException> {
             config.workflow("", firstWorkflow)
         }
+
+        assertTrue(config.registeredWorkflows().isEmpty())
     }
 
     @Test
@@ -137,6 +139,8 @@ class KiwiFlowConfigTest {
         assertFailsWith<IllegalArgumentException> {
             config.workflow("   ", firstWorkflow)
         }
+
+        assertTrue(config.registeredWorkflows().isEmpty())
     }
 
     @Test

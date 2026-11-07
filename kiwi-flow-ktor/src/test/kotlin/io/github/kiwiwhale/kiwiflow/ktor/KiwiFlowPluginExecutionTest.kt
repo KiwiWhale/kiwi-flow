@@ -4,6 +4,7 @@ import io.github.kiwiwhale.kiwiflow.core.KiwiFlow
 import io.github.kiwiwhale.kiwiflow.core.workflow.KiwiWorkflowKey
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -29,17 +30,7 @@ class KiwiFlowPluginExecutionTest {
                 workflow("Hello", helloWorkflow)
             }
 
-            routing {
-                get("/hello/{name}") {
-                    val name = call.parameters["name"]!!
-
-                    val result = call.application.kiwiFlow
-                        .workflow(helloWorkflowKey)
-                        .execute(name)
-
-                    call.respondText(result)
-                }
-            }
+            configureRouting()
         }
 
         val response = client.get("/hello/Ktor")
@@ -57,17 +48,7 @@ class KiwiFlowPluginExecutionTest {
                 workflow("Hello", helloWorkflow)
             }
 
-            routing {
-                get("/hello/{name}") {
-                    val name = call.parameters["name"]!!
-
-                    val result = call.application.kiwiFlow
-                        .workflow(helloWorkflowKey)
-                        .execute(name)
-
-                    call.respondText(result)
-                }
-            }
+            configureRouting()
         }
 
         assertEquals(
@@ -79,5 +60,19 @@ class KiwiFlowPluginExecutionTest {
             "Hello Spring",
             client.get("/hello/Spring").bodyAsText()
         )
+    }
+
+    private fun Application.configureRouting() {
+        routing {
+            get("/hello/{name}") {
+                val name = call.parameters["name"]!!
+
+                val result = call.application.kiwiFlow
+                    .workflow(helloWorkflowKey)
+                    .execute(name)
+
+                call.respondText(result)
+            }
+        }
     }
 }

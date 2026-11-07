@@ -19,7 +19,7 @@ class KiwiFlowPluginDuplicateTest {
         }
 
     @Test
-    fun `중복된 이름으로 Workflow를 등록하면 예외가 발생한다`() {
+    fun `동일한 이름의 Workflow를 중복 등록하면 예외가 발생한다`() {
         assertFailsWith<IllegalStateException> {
             testApplication {
                 application {
