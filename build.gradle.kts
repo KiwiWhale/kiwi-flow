@@ -1,4 +1,3 @@
-
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
@@ -8,7 +7,7 @@ plugins {
 }
 
 group = "io.github.kiwiwhale.kiwiflow"
-version = "1.3.1"
+version = "1.3.2"
 
 val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
 val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
